@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employer Dashboard — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="dash-page">
+  <div class="container">
+    <div id="dashContent"></div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script src="js/search.js?v=4"></script>
+<script src="js/recommendations.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('employers');
+  renderFooter();
+
+  const user = Auth.requireAuth('login.html');
+  if (user && user.type !== 'employer') window.location.href = 'dashboard-candidate.html';
+
+  function avatar(name) { return (name || '?').charAt(0).toUpperCase(); }
+
+  function render() {
+    if (!user) return;
+    const myJobs = DB.getJobs().filter(j => j.employerId === user.id);
+    const totalApps = myJobs.reduce((s, j) => s + (j.applicants || 0), 0);
+
+    // AI recommended candidates for the latest job
+    const latestJob = myJobs[0];
+    const limit = getRecommendationLimit(user);
+    const recCands = latestJob ? recommendCandidatesForJob(latestJob, limit) : [];
+
+    document.getElementById('dashContent').innerHTML = `
+      <div class="page-header">
+        <h1>Welcome back, ${user.name.split(' ')[0]}! 👋</h1>
+        <p>${user.company ? user.company + ' · ' : ''}Employer Dashboard</p>
+      </div>
+
+      <div class="dash-stats">
+        <div class="stat-card">
+          <div class="stat-label">Jobs Posted</div>
+          <div class="stat-value">${myJobs.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Applications</div>
+          <div class="stat-value">${totalApps}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">AI Matches</div>
+          <div class="stat-value">${recCands.length}${!user.isMember ? '*' : ''}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Membership</div>
+          <div class="stat-value" style="font-size:1rem;padding-top:8px">${user.isMember ? '⭐ Premium' : 'Free'}</div>
+        </div>
+      </div>
+
+      ${!user.isMember ? `
+        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>Upgrade to see unlimited candidate recommendations</strong>
+            <p style="font-size:.82rem;color:#78350f;margin-top:2px">Free plan shows top 10 candidates per job. Members see all matches.</p>
+          </div>
+          <a href="membership.html" class="btn btn-primary btn-sm">Upgrade</a>
+        </div>` : ''}
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3>My Job Postings (${myJobs.length})</h3>
+        <a href="employers.html" class="btn btn-primary btn-sm">+ Post New Job</a>
+      </div>
+      ${myJobs.length ? `
+        <div style="margin-bottom:32px">
+          ${myJobs.map(j => `
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+              <div>
+                <div style="font-weight:600">${j.title}</div>
+                <div style="font-size:.8rem;color:#6b7280">${j.location} · ${j.workMode} · ${j.jobType}</div>
+                <div style="font-size:.75rem;color:#9ca3af;margin-top:2px">${j.applicants} applicants · Posted: ${j.postedAt}</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <a href="candidates.html?jobId=${j.id}" class="btn btn-outline btn-sm">AI Matches</a>
+                <span style="background:#dbeafe;color:#1d4ed8;padding:4px 12px;border-radius:6px;font-size:.78rem;font-weight:500">Live</span>
+              </div>
+            </div>`).join('')}
+        </div>` : '<p style="color:#9ca3af;font-size:.85rem;margin-bottom:32px">No jobs posted yet. <a href="employers.html" style="color:#4A6CF7">Post your first job</a></p>'}
+
+      ${latestJob ? `
+        <h3 style="margin-bottom:8px">AI Recommended Candidates</h3>
+        <p style="font-size:.82rem;color:#6b7280;margin-bottom:16px">Based on: <strong>${latestJob.title}</strong> ${!user.isMember ? '· Showing top 10 (upgrade for all)' : ''}</p>
+        <div class="jobs-grid-2">
+          ${recCands.slice(0, 6).map(c => `
+            <div class="candidate-card">
+              <div class="cand-header">
+                <div class="cand-avatar">${avatar(c.name)}</div>
+                <div style="flex:1">
+                  <div class="cand-name">${c.name}</div>
+                  <div class="cand-title">${c.fieldOfStudy || ''} · ${c.yearsOfExperience || 0} yrs</div>
+                </div>
+                <span class="match-score">🎯 ${c.matchScore}%</span>
+              </div>
+              <div class="cand-skills">
+                ${(c.skills||[]).slice(0,4).map(s=>`<span class="cand-skill-tag">${s}</span>`).join('')}
+              </div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <a href="candidates.html" class="btn btn-outline btn-sm">View Profile</a>
+                <button class="btn btn-primary btn-sm" onclick="contact('${c.id}')">Contact</button>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div style="text-align:center;margin-top:16px">
+          <a href="candidates.html" class="btn btn-outline">Browse All Candidates</a>
+        </div>` : ''}`;
+  }
+
+  function contact(candId) {
+    const c = DB.getUserById(candId);
+    alert(`Contact ${c?.name}\nEmail: ${c?.email}\nMobile: ${c?.mobile || 'Not provided'}`);
+  }
+
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="about-hero">
+  <div class="container">
+    <h1>About TalentMatch</h1>
+    <p>We're building the world's most intelligent talent matching platform — connecting the right people with the right opportunities using AI.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>How It Works</h2>
+      <p>A two-way intelligent matching system for both candidates and employers</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="about-icon">👤</div>
+        <h3>Build Your Profile</h3>
+        <p style="font-size:.875rem;color:#6b7280;margin-top:8px">Candidates upload their resume and complete their profile with skills, experience, and work preferences.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🤖</div>
+        <h3>AI Matching</h3>
+        <p style="font-size:.875rem;color:#6b7280;margin-top:8px">Our algorithm scores matches across skills, experience, work mode, location, and education for maximum accuracy.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🎯</div>
+        <h3>Smart Recommendations</h3>
+        <p style="font-size:.875rem;color:#6b7280;margin-top:8px">Members get unlimited personalised job or candidate recommendations. Free users get the top 10.</p>
+      </div>
+    </div>
+
+    <div style="max-width:680px;margin:60px auto 0;text-align:center">
+      <h2 style="margin-bottom:16px">Intelligent Search</h2>
+      <p style="color:#6b7280;margin-bottom:24px">Our search engine handles keyword search, advanced filters, combined keyword+filter queries, and fuzzy matching — so typos like "sofware enginer" still find "Software Engineer" jobs.</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <div style="background:#eef2ff;border-radius:10px;padding:16px 24px;font-size:.85rem"><strong>Keywords</strong><br>Match by title, skills, description</div>
+        <div style="background:#eef2ff;border-radius:10px;padding:16px 24px;font-size:.85rem"><strong>Filters</strong><br>Salary, location, job type</div>
+        <div style="background:#eef2ff;border-radius:10px;padding:16px 24px;font-size:.85rem"><strong>Fuzzy Search</strong><br>Handles typos & synonyms</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:60px">
+      <h2 style="margin-bottom:12px">Ready to get started?</h2>
+      <p style="color:#6b7280;margin-bottom:24px">Join thousands of candidates and employers already using TalentMatch.</p>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <a href="register.html" class="btn btn-primary btn-lg">Create Account</a>
+        <a href="find-jobs.html" class="btn btn-outline btn-lg">Browse Jobs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('about');
+  renderFooter();
+</script>
+</body>
+</html>

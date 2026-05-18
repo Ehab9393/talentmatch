@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate Dashboard — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="dash-page">
+  <div class="container">
+    <div id="dashContent"></div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script src="js/search.js?v=4"></script>
+<script src="js/recommendations.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('profile');
+  renderFooter();
+
+  const user = Auth.requireAuth('login.html');
+  if (user && user.type !== 'candidate') window.location.href = 'dashboard-employer.html';
+
+  function badgeClass(t) { return {'full-time':'badge-full','part-time':'badge-part','internship':'badge-intern','contract':'badge-contract'}[t]||'badge-full'; }
+  function badgeLabel(t) { return {'full-time':'Full-Time','part-time':'Part-Time','internship':'Internship','contract':'Contract'}[t]||t; }
+  function logoHtml(logo) {
+    const init = {google:'G',apple:'',intel:'i',microsoft:'M',amazon:'A',meta:'f'};
+    return `<div class="company-logo-box ${logo}">${init[logo]||logo?.charAt(0)?.toUpperCase()||'?'}</div>`;
+  }
+
+  function render() {
+    if (!user) return;
+    const applications = DB.getCandidateApplications(user.id);
+    const savedIds = DB.getSaved(user.id);
+    const savedJobs = savedIds.map(id => DB.getJobById(id)).filter(Boolean);
+    const limit = getRecommendationLimit(user);
+    const recs = recommendJobsForCandidate(user, limit);
+
+    document.getElementById('dashContent').innerHTML = `
+      <div class="page-header">
+        <h1>Welcome back, ${user.name.split(' ')[0]}! 👋</h1>
+        <p>Here's your job seeking activity</p>
+      </div>
+
+      <div class="dash-stats">
+        <div class="stat-card">
+          <div class="stat-label">Applications Sent</div>
+          <div class="stat-value">${applications.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Saved Jobs</div>
+          <div class="stat-value">${savedJobs.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">AI Matches</div>
+          <div class="stat-value">${recs.length}${!user.isMember ? '*' : ''}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Membership</div>
+          <div class="stat-value" style="font-size:1rem;padding-top:8px">${user.isMember ? '⭐ Premium' : 'Free'}</div>
+        </div>
+      </div>
+
+      ${!user.isMember ? `
+        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>Upgrade to Premium</strong>
+            <p style="font-size:.82rem;color:#78350f;margin-top:2px">You're seeing top 10 recommendations. Members get unlimited matches.</p>
+          </div>
+          <a href="membership.html" class="btn btn-primary btn-sm">Upgrade</a>
+        </div>` : ''}
+
+      ${applications.length ? `
+        <h3 style="margin-bottom:16px">My Applications (${applications.length})</h3>
+        <div style="margin-bottom:32px">
+          ${applications.map(a => `
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px">
+              ${logoHtml(a.job.companyLogo)}
+              <div style="flex:1">
+                <div style="font-weight:600">${a.job.title}</div>
+                <div style="font-size:.8rem;color:#6b7280">${a.job.company} · ${a.job.location}</div>
+              </div>
+              <span class="badge" style="background:#d1fae5;color:#065f46">${a.status}</span>
+              <span style="font-size:.75rem;color:#9ca3af">${a.appliedAt?.split('T')[0] || ''}</span>
+            </div>`).join('')}
+        </div>` : ''}
+
+      ${savedJobs.length ? `
+        <h3 style="margin-bottom:16px">Saved Jobs (${savedJobs.length})</h3>
+        <div class="jobs-grid-2" style="margin-bottom:32px">
+          ${savedJobs.map(j => `
+            <div class="job-card">
+              <div class="job-card-top"><span class="badge ${badgeClass(j.jobType)}">${badgeLabel(j.jobType)}</span></div>
+              <div class="job-card-title">${j.title}</div>
+              <div class="job-card-company">${logoHtml(j.companyLogo)}<span>${j.company}</span></div>
+              <div class="job-card-location">📍 ${j.location}</div>
+              <div class="job-card-actions">
+                <a href="find-jobs.html?q=${encodeURIComponent(j.title)}" class="btn btn-outline btn-sm">View</a>
+              </div>
+            </div>`).join('')}
+        </div>` : ''}
+
+      <h3 style="margin-bottom:16px">AI Recommended for You ${!user.isMember ? '<span style="font-size:.75rem;color:#9ca3af">(Top 10 — Upgrade for unlimited)</span>' : ''}</h3>
+      <div class="jobs-grid-2">
+        ${recs.slice(0, 6).map(j => `
+          <div class="job-card">
+            <div class="job-card-top">
+              <span class="badge ${badgeClass(j.jobType)}">${badgeLabel(j.jobType)}</span>
+              <span style="font-size:.75rem;color:#065f46;background:#d1fae5;padding:2px 8px;border-radius:12px">${j.matchScore}% match</span>
+            </div>
+            <div class="job-card-title">${j.title}</div>
+            <div class="job-card-company">${logoHtml(j.companyLogo)}<span>${j.company}</span></div>
+            <div class="job-card-location">📍 ${j.location}</div>
+            <div class="job-card-actions">
+              <a href="find-jobs.html?q=${encodeURIComponent(j.title)}" class="btn btn-outline btn-sm">View</a>
+              <button class="btn btn-primary btn-sm" onclick="apply('${j.id}')">Apply</button>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div style="text-align:center;margin-top:16px">
+        <a href="find-jobs.html" class="btn btn-outline">Browse All Jobs</a>
+      </div>`;
+  }
+
+  function apply(jobId) {
+    const ok = DB.applyToJob(jobId, user.id);
+    alert(ok ? '✓ Applied!' : 'Already applied.');
+    render();
+  }
+
+  render();
+</script>
+</body>
+</html>

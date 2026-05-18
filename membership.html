@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membership — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="membership-page">
+  <div class="container">
+    <div class="section-header">
+      <h2>Upgrade Your Experience</h2>
+      <p>Unlock unlimited recommendations and premium features</p>
+    </div>
+
+    <!-- Current status banner -->
+    <div id="statusBanner" style="text-align:center;margin-bottom:12px"></div>
+
+    <div class="plans-wrap">
+      <!-- Free Plan -->
+      <div class="plan-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0 <small>/ month</small></div>
+        <div class="plan-period">No credit card required</div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> Create a profile / job posting</li>
+          <li><span class="feat-check">✓</span> Browse all jobs & candidates</li>
+          <li><span class="feat-check">✓</span> Apply for jobs</li>
+          <li><span class="feat-check">✓</span> Top 10 AI-recommended jobs/candidates</li>
+          <li><span class="feat-x">✗</span> Unlimited AI recommendations</li>
+          <li><span class="feat-x">✗</span> Priority listing in search</li>
+          <li><span class="feat-x">✗</span> Profile analytics & insights</li>
+          <li><span class="feat-x">✗</span> Dedicated support</li>
+        </ul>
+        <button class="btn btn-outline btn-full" id="freeBtn" onclick="selectFree()">Current Plan</button>
+      </div>
+
+      <!-- Premium Plan -->
+      <div class="plan-card featured">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">$9.99 <small>/ month</small></div>
+        <div class="plan-period">Billed monthly — cancel anytime</div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> Everything in Free</li>
+          <li><span class="feat-check">✓</span> <strong>Unlimited AI recommendations</strong></li>
+          <li><span class="feat-check">✓</span> Priority listing in search</li>
+          <li><span class="feat-check">✓</span> Profile analytics & insights</li>
+          <li><span class="feat-check">✓</span> Advanced filters & search</li>
+          <li><span class="feat-check">✓</span> Resume AI parsing (unlimited)</li>
+          <li><span class="feat-check">✓</span> Dedicated customer support</li>
+          <li><span class="feat-check">✓</span> Early access to new features</li>
+        </ul>
+        <button class="btn btn-primary btn-full" id="premiumBtn" onclick="selectPremium()">Upgrade to Premium</button>
+      </div>
+    </div>
+
+    <!-- Feature comparison table -->
+    <div style="max-width:680px;margin:48px auto 0">
+      <h3 style="text-align:center;margin-bottom:20px;font-size:1rem">Feature Comparison</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+        <thead>
+          <tr style="background:#f8faff">
+            <th style="padding:12px 16px;text-align:left;border-bottom:2px solid #e5e7eb">Feature</th>
+            <th style="padding:12px 16px;text-align:center;border-bottom:2px solid #e5e7eb">Free</th>
+            <th style="padding:12px 16px;text-align:center;border-bottom:2px solid #e5e7eb;color:#4A6CF7">Premium</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #f3f4f6">
+            <td style="padding:12px 16px">AI job/candidate recommendations</td>
+            <td style="padding:12px 16px;text-align:center">Top 10</td>
+            <td style="padding:12px 16px;text-align:center;color:#4A6CF7;font-weight:600">Unlimited ♾</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6;background:#fafafa">
+            <td style="padding:12px 16px">Job applications per month</td>
+            <td style="padding:12px 16px;text-align:center">20</td>
+            <td style="padding:12px 16px;text-align:center;color:#4A6CF7;font-weight:600">Unlimited</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6">
+            <td style="padding:12px 16px">Profile visibility</td>
+            <td style="padding:12px 16px;text-align:center">Standard</td>
+            <td style="padding:12px 16px;text-align:center;color:#4A6CF7;font-weight:600">Priority</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6;background:#fafafa">
+            <td style="padding:12px 16px">Advanced keyword + fuzzy search</td>
+            <td style="padding:12px 16px;text-align:center">✓</td>
+            <td style="padding:12px 16px;text-align:center;color:#4A6CF7;font-weight:600">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f3f4f6">
+            <td style="padding:12px 16px">Match score visibility</td>
+            <td style="padding:12px 16px;text-align:center">✗</td>
+            <td style="padding:12px 16px;text-align:center;color:#4A6CF7;font-weight:600">✓</td>
+          </tr>
+          <tr style="background:#fafafa">
+            <td style="padding:12px 16px">Customer support</td>
+            <td style="padding:12px 16px;text-align:center">Community</td>
+            <td style="padding:12px 16px;text-align:center;color:#4A6CF7;font-weight:600">Dedicated</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('');
+  renderFooter();
+
+  const user = Auth.getCurrentUser();
+
+  function updateUI() {
+    const cu = Auth.getCurrentUser();
+    const premBtn = document.getElementById('premiumBtn');
+    const freeBtn = document.getElementById('freeBtn');
+    const banner = document.getElementById('statusBanner');
+
+    if (!cu) {
+      banner.innerHTML = `<div class="alert alert-info">Please <a href="login.html">login</a> to manage your membership.</div>`;
+      return;
+    }
+
+    if (cu.isMember) {
+      premBtn.textContent = '✓ Current Plan';
+      premBtn.classList.remove('btn-primary');
+      premBtn.classList.add('btn-success');
+      freeBtn.textContent = 'Downgrade to Free';
+      freeBtn.classList.add('btn-danger');
+      freeBtn.classList.remove('btn-outline');
+      banner.innerHTML = `<div class="alert alert-ok">You have an active <strong>Premium</strong> membership. Enjoy unlimited recommendations!</div>`;
+    } else {
+      premBtn.textContent = 'Upgrade to Premium';
+      premBtn.classList.add('btn-primary');
+      premBtn.classList.remove('btn-success');
+      freeBtn.textContent = '✓ Current Plan';
+      banner.innerHTML = `<div class="alert alert-info">You are on the <strong>Free</strong> plan. Upgrade to Premium for unlimited AI recommendations.</div>`;
+    }
+  }
+
+  function selectPremium() {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const cu = Auth.getCurrentUser();
+    if (cu.isMember) { alert('You already have Premium!'); return; }
+    if (confirm('Upgrade to Premium for $9.99/month?\n\n(Demo: payment is simulated)')) {
+      const updated = { ...cu, isMember: true };
+      DB.updateUser(updated);
+      DB.setSession(updated);
+      alert('🎉 Welcome to Premium! You now have unlimited AI recommendations.');
+      updateUI();
+      renderNavbar('');
+    }
+  }
+
+  function selectFree() {
+    if (!user) return;
+    const cu = Auth.getCurrentUser();
+    if (!cu.isMember) { alert('You are already on the Free plan.'); return; }
+    if (confirm('Downgrade to Free plan? You will lose unlimited recommendations.')) {
+      const updated = { ...cu, isMember: false };
+      DB.updateUser(updated);
+      DB.setSession(updated);
+      alert('Downgraded to Free plan.');
+      updateUI();
+      renderNavbar('');
+    }
+  }
+
+  updateUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="auth-page" style="background:#f8faff">
+  <div class="auth-wrap" style="max-width:620px">
+    <div style="background:#fff;border-radius:12px;padding:48px;box-shadow:0 8px 40px rgba(0,0,0,.08)">
+      <h1 class="auth-title">Registration form</h1>
+      <p class="auth-sub">Register to apply for jobs of your choice all over the world</p>
+      <div id="regAlert"></div>
+
+      <div class="form-group">
+        <label>Full name<span class="required">*</span></label>
+        <input type="text" id="regName" placeholder="Enter your full name">
+      </div>
+
+      <div class="form-group">
+        <label>Account type<span class="required">*</span></label>
+        <select id="regType">
+          <option value="candidate">Job Seeker / Candidate</option>
+          <option value="employer">Employer / Company</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="companyGroup" style="display:none">
+        <label>Company Name<span class="required">*</span></label>
+        <input type="text" id="regCompany" placeholder="Enter your company name">
+      </div>
+
+      <div class="form-group">
+        <label>Email ID<span class="required">*</span></label>
+        <input type="email" id="regEmail" placeholder="Enter your email id">
+        <p class="input-hint">Job notifications will be sent to this email id</p>
+      </div>
+
+      <div class="form-group">
+        <label>Mobile number<span class="required">*</span></label>
+        <input type="tel" id="regMobile" placeholder="Enter your mobile number">
+        <p class="input-hint blue">Recruiters will contact you on this number</p>
+      </div>
+
+      <div class="form-group">
+        <label>Password<span class="required">*</span></label>
+        <div class="pass-wrap">
+          <input type="password" id="regPass" placeholder="Minimum 6 characters">
+          <button class="pass-toggle" type="button" onclick="togglePass()">Show</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label class="checkbox-row"><input type="checkbox" id="rememberPwd"> Remember your password</label>
+      </div>
+      <div style="margin-bottom:18px">
+        <label class="checkbox-row" style="align-items:flex-start;gap:8px">
+          <input type="checkbox" id="promoCheck" checked style="margin-top:3px">
+          Send me the important updates & promotions via SMS, email and Whatsapp
+        </label>
+      </div>
+
+      <p style="font-size:.78rem;color:#6b7280;margin-bottom:20px">
+        By clicking Register, you agree to the
+        <a href="#" style="color:#4A6CF7">Terms and Conditions</a> &amp;
+        <a href="#" style="color:#4A6CF7">Privacy Policy</a> of TalentMatch.com
+      </p>
+
+      <button class="btn btn-primary btn-full btn-lg" onclick="doRegister()">Register now</button>
+
+      <div class="or-divider" style="margin:24px 0">or signup with</div>
+      <div class="social-btns">
+        <button class="social-btn" title="Google" onclick="socialSignup()">G</button>
+        <button class="social-btn" title="Facebook" onclick="socialSignup()">f</button>
+        <button class="social-btn" title="LinkedIn" onclick="socialSignup()">in</button>
+      </div>
+      <p class="auth-switch" style="margin-top:16px">Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('');
+
+  if (Auth.getCurrentUser()) window.location.href = 'index.html';
+
+  document.getElementById('regType').addEventListener('change', function() {
+    document.getElementById('companyGroup').style.display = this.value === 'employer' ? 'block' : 'none';
+  });
+
+  function togglePass() {
+    const el = document.getElementById('regPass');
+    const btn = el.nextElementSibling;
+    const hidden = el.type === 'password';
+    el.type = hidden ? 'text' : 'password';
+    btn.textContent = hidden ? 'Hide' : 'Show';
+  }
+
+  function showAlert(msg, type = 'err') {
+    document.getElementById('regAlert').innerHTML =
+      `<div class="alert alert-${type}">${msg}</div>`;
+  }
+
+  function doRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const type = document.getElementById('regType').value;
+    const email = document.getElementById('regEmail').value.trim();
+    const mobile = document.getElementById('regMobile').value.trim();
+    const pass = document.getElementById('regPass').value;
+    const company = document.getElementById('regCompany').value.trim();
+
+    if (!name) { showAlert('Please enter your full name.'); return; }
+    if (type === 'employer' && !company) { showAlert('Please enter your company name.'); return; }
+    if (!email) { showAlert('Please enter your email address.'); return; }
+    if (!mobile) { showAlert('Please enter your mobile number.'); return; }
+    if (pass.length < 6) { showAlert('Password must be at least 6 characters.'); return; }
+
+    const res = Auth.register({ name, type, email, mobile, password: pass, company, companyLogo: 'default', companyDescription: '' });
+    if (!res.ok) { showAlert(res.error); return; }
+
+    showAlert('Account created successfully! Redirecting...', 'ok');
+    setTimeout(() => {
+      // Employers go to dashboard; candidates go to complete their profile
+      window.location.href = type === 'employer' ? 'dashboard-employer.html' : 'profile.html';
+    }, 1200);
+  }
+
+  function socialSignup() {
+    alert('Social signup is not available in demo mode. Please use the registration form.');
+  }
+</script>
+</body>
+</html>

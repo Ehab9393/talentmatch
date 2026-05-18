@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="profile-page">
+  <div class="container">
+    <div class="page-header">
+      <h1>My Profile</h1>
+      <p>Complete your profile to improve match quality.</p>
+    </div>
+    <div class="profile-layout">
+
+      <!-- Main Form -->
+      <div class="profile-main">
+        <div id="profileAlert"></div>
+
+        <!-- Resume Upload -->
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('resumeFile').click()">
+          <div class="upload-icon">↑</div>
+          <p><strong class="upload-link">Upload resume</strong> or drag and drop</p>
+          <small>PDF, DOCX up to 5MB — AI will auto-fill fields</small>
+          <div id="uploadedName" style="margin-top:8px;font-size:.8rem;color:#4A6CF7;font-weight:500"></div>
+        </div>
+        <input type="file" id="resumeFile" accept=".pdf,.docx" style="display:none" onchange="handleUpload(this)">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full name<span class="required">*</span></label>
+            <input type="text" id="pName" placeholder="Enter your full name">
+          </div>
+          <div class="form-group">
+            <label>Email ID<span class="required">*</span></label>
+            <input type="email" id="pEmail" placeholder="Enter your email id">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mobile number<span class="required">*</span></label>
+            <input type="tel" id="pMobile" placeholder="Enter your mobile number">
+          </div>
+          <div class="form-group">
+            <label>Location<span class="required">*</span></label>
+            <input type="text" id="pLocation" placeholder="Enter your location (e.g. Sydney, AU)">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Education Level<span class="required">*</span></label>
+            <select id="pEducation">
+              <option value="">Select education level</option>
+              <option>High School</option>
+              <option>Diploma</option>
+              <option>Associate's</option>
+              <option>Bachelor's</option>
+              <option>Master's</option>
+              <option>MBA</option>
+              <option>PhD / Doctorate</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Field of Study<span class="required">*</span></label>
+            <input type="text" id="pField" placeholder="e.g. Computer Science">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Years of Experience<span class="required">*</span></label>
+            <select id="pExp">
+              <option value="">Select years</option>
+              <option value="0">Fresher (0)</option>
+              <option value="1">1 year</option>
+              <option value="2">2 years</option>
+              <option value="3">3 years</option>
+              <option value="4">4 years</option>
+              <option value="5">5 years</option>
+              <option value="7">6–7 years</option>
+              <option value="10">8–10 years</option>
+              <option value="15">10+ years</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Preferred Location</label>
+            <input type="text" id="pPrefLocation" placeholder="e.g. Sydney, Remote">
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="form-group">
+          <label>Skills<span class="required">*</span></label>
+          <div class="skills-wrap" id="skillsWrap">
+            <div class="skills-tags" id="skillsTags"></div>
+            <input class="skill-input" id="skillInput" placeholder="Add skill..." onkeydown="handleSkillKey(event)">
+          </div>
+          <p class="input-hint">Press Enter or comma to add a skill</p>
+        </div>
+
+        <!-- Bio -->
+        <div class="form-group">
+          <label>Bio / Summary<span class="required">*</span></label>
+          <textarea id="pBio" rows="4" placeholder="Full-stack engineer with 4 years of experience building scalable web applications."></textarea>
+        </div>
+
+        <!-- Work Experience -->
+        <div style="margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <label style="font-size:.875rem;font-weight:600;margin:0">Work Experience</label>
+            <button class="btn btn-outline btn-sm" onclick="addWorkExp()">+ Add Experience</button>
+          </div>
+          <div id="workExpList"></div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn btn-primary" onclick="saveProfile()">✓ Save profile</button>
+          <button class="btn btn-outline" onclick="previewProfile()">Preview public profile</button>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="profile-sidebar">
+        <!-- Completeness -->
+        <div class="sidebar-card">
+          <h4>Profile completeness</h4>
+          <div class="progress-pct" id="progressPct">0%</div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+          <div id="checkList"></div>
+        </div>
+
+        <!-- Work mode preference -->
+        <div class="sidebar-card">
+          <h4>Work mode preference</h4>
+          <div class="radio-list">
+            <label class="radio-opt"><input type="radio" name="workmode" value="remote" id="wmRemote"> Remote</label>
+            <label class="radio-opt"><input type="radio" name="workmode" value="hybrid" id="wmHybrid"> Hybrid</label>
+            <label class="radio-opt"><input type="radio" name="workmode" value="on-site" id="wmOnsite"> On-site</label>
+            <label class="radio-opt"><input type="radio" name="workmode" value="no preference" id="wmNone"> No preferences</label>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end profile-layout -->
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('profile');
+  renderFooter();
+
+  const user = Auth.requireAuth('login.html');
+  if (user && user.type !== 'candidate') window.location.href = 'employers.html';
+
+  let skills = [];
+  let workExperiences = [];
+
+  function init() {
+    if (!user) return;
+    document.getElementById('pName').value = user.name || '';
+    document.getElementById('pEmail').value = user.email || '';
+    document.getElementById('pMobile').value = user.mobile || '';
+    document.getElementById('pLocation').value = user.location || '';
+    document.getElementById('pEducation').value = user.educationLevel || '';
+    document.getElementById('pField').value = user.fieldOfStudy || '';
+    document.getElementById('pExp').value = user.yearsOfExperience || '';
+    document.getElementById('pBio').value = user.bio || '';
+    document.getElementById('pPrefLocation').value = user.preferredLocation || '';
+
+    skills = [...(user.skills || [])];
+    workExperiences = JSON.parse(JSON.stringify(user.workExperience || []));
+
+    const wm = user.preferredWorkMode || 'no preference';
+    document.querySelectorAll('input[name="workmode"]').forEach(r => { r.checked = r.value === wm; });
+
+    renderSkills();
+    renderWorkExp();
+    updateCompleteness();
+    ['pName','pEmail','pMobile','pLocation','pEducation','pField','pExp','pBio','pPrefLocation'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateCompleteness);
+    });
+  }
+
+  function renderSkills() {
+    document.getElementById('skillsTags').innerHTML = skills.map((s, i) =>
+      `<span class="skill-tag">${s}<button onclick="removeSkill(${i})">×</button></span>`
+    ).join('');
+  }
+
+  function handleSkillKey(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = e.target.value.replace(/,/g, '').trim();
+      if (val && !skills.includes(val)) {
+        skills.push(val);
+        renderSkills();
+        updateCompleteness();
+      }
+      e.target.value = '';
+    }
+  }
+
+  function removeSkill(i) {
+    skills.splice(i, 1);
+    renderSkills();
+    updateCompleteness();
+  }
+
+  function addWorkExp() {
+    workExperiences.push({ title: '', company: '', from: '', to: '', current: false, description: '' });
+    renderWorkExp();
+  }
+
+  function renderWorkExp() {
+    const list = document.getElementById('workExpList');
+    if (!workExperiences.length) {
+      list.innerHTML = '<p style="font-size:.82rem;color:#9ca3af;text-align:center;padding:16px">No work experience added yet.</p>';
+      return;
+    }
+    list.innerHTML = workExperiences.map((exp, i) => `
+      <div class="work-exp-card">
+        <button class="remove-exp" onclick="removeExp(${i})">×</button>
+        <div class="form-row" style="margin-bottom:12px">
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.78rem">Job Title</label>
+            <input type="text" value="${exp.title}" placeholder="e.g. Frontend Developer" oninput="updateExp(${i},'title',this.value)">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.78rem">Company</label>
+            <input type="text" value="${exp.company}" placeholder="e.g. Google" oninput="updateExp(${i},'company',this.value)">
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px">
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.78rem">From (YYYY-MM)</label>
+            <input type="month" value="${exp.from}" oninput="updateExp(${i},'from',this.value)">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.78rem">To (YYYY-MM)</label>
+            <input type="month" value="${exp.to}" ${exp.current ? 'disabled' : ''} oninput="updateExp(${i},'to',this.value)">
+          </div>
+        </div>
+        <label class="checkbox-row" style="margin-bottom:10px;font-size:.78rem">
+          <input type="checkbox" ${exp.current ? 'checked' : ''} onchange="updateExp(${i},'current',this.checked);renderWorkExp()"> Currently working here
+        </label>
+        <div class="form-group" style="margin:0">
+          <label style="font-size:.78rem">Description</label>
+          <textarea rows="2" placeholder="Brief description of your role..." oninput="updateExp(${i},'description',this.value)">${exp.description}</textarea>
+        </div>
+      </div>`).join('');
+  }
+
+  function updateExp(i, field, val) { workExperiences[i][field] = val; }
+  function removeExp(i) { workExperiences.splice(i, 1); renderWorkExp(); }
+
+  const CHECKS = [
+    { id: 'chkBasic', label: 'Basic info added', check: () => document.getElementById('pName').value && document.getElementById('pEmail').value },
+    { id: 'chkResume', label: 'Resume uploaded', check: () => document.getElementById('uploadedName').textContent },
+    { id: 'chkEdu', label: 'Education filled', check: () => document.getElementById('pEducation').value },
+    { id: 'chkSkills', label: 'Skills added', check: () => skills.length > 0 },
+    { id: 'chkWorkExp', label: 'Work experience added', check: () => workExperiences.length > 0 },
+    { id: 'chkBio', label: 'Bio / Summary added', check: () => document.getElementById('pBio').value },
+    { id: 'chkPref', label: 'Work mode preferences', check: () => document.querySelector('input[name="workmode"]:checked') },
+  ];
+
+  function updateCompleteness() {
+    const done = CHECKS.filter(c => c.check()).length;
+    const pct = Math.round((done / CHECKS.length) * 100);
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('checkList').innerHTML = CHECKS.map(c => {
+      const ok = c.check();
+      return `<div class="check-item ${ok ? 'done' : ''}">
+        <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          ${ok ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" stroke="#10b981"/><circle cx="12" cy="12" r="10" stroke="#10b981"/>'
+               : '<circle cx="12" cy="12" r="10"/>'}
+        </svg>
+        ${c.label}
+      </div>`;
+    }).join('');
+  }
+  document.querySelectorAll('input[name="workmode"]').forEach(r => r.addEventListener('change', updateCompleteness));
+
+  function handleUpload(input) {
+    if (input.files[0]) {
+      document.getElementById('uploadedName').textContent = '✓ ' + input.files[0].name;
+      updateCompleteness();
+    }
+  }
+  const uz = document.getElementById('uploadZone');
+  uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('dragover'); });
+  uz.addEventListener('dragleave', () => uz.classList.remove('dragover'));
+  uz.addEventListener('drop', e => {
+    e.preventDefault(); uz.classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f) { document.getElementById('uploadedName').textContent = '✓ ' + f.name; updateCompleteness(); }
+  });
+
+  function saveProfile() {
+    const wm = document.querySelector('input[name="workmode"]:checked');
+    const updated = {
+      ...user,
+      name: document.getElementById('pName').value.trim(),
+      email: document.getElementById('pEmail').value.trim(),
+      mobile: document.getElementById('pMobile').value.trim(),
+      location: document.getElementById('pLocation').value.trim(),
+      educationLevel: document.getElementById('pEducation').value,
+      fieldOfStudy: document.getElementById('pField').value.trim(),
+      yearsOfExperience: document.getElementById('pExp').value,
+      bio: document.getElementById('pBio').value.trim(),
+      preferredLocation: document.getElementById('pPrefLocation').value.trim(),
+      preferredWorkMode: wm ? wm.value : '',
+      skills,
+      workExperience: workExperiences
+    };
+    DB.updateUser(updated);
+    DB.setSession(updated);
+    document.getElementById('profileAlert').innerHTML =
+      '<div class="alert alert-ok">✓ Profile saved successfully!</div>';
+    setTimeout(() => document.getElementById('profileAlert').innerHTML = '', 3000);
+  }
+
+  function previewProfile() {
+    const name = document.getElementById('pName').value || user.name;
+    const bio = document.getElementById('pBio').value || 'No bio added.';
+    alert(`Public Profile Preview\n\n${name}\n\nSkills: ${skills.join(', ') || 'None'}\n\nBio: ${bio}`);
+  }
+
+  init();
+</script>
+</body>
+</html>

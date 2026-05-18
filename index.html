@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentMatch — Intelligent Talent Matching Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <h1>We'll find you a job that aligns with your interests and skills</h1>
+      <p>Thousands of jobs in all the leading sector are waiting for you.</p>
+      <div class="hero-search">
+        <div class="hero-search-field">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="heroSearchInput" placeholder="Job title, Keyword...">
+        </div>
+        <div class="hero-search-field">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <input type="text" id="heroLocationInput" placeholder="Location">
+        </div>
+        <button class="btn btn-primary" onclick="heroSearch()">Find Job</button>
+      </div>
+      <p class="hero-suggestions">
+        Suggestion: <a href="find-jobs.html?q=UI/UX+Designer">UI/UX Designer</a>,
+        <a href="find-jobs.html?q=Programming">Programming</a>,
+        <a href="find-jobs.html?q=Digital+Marketing">Digital Marketing</a>,
+        <a href="find-jobs.html?q=Video">Video</a>,
+        <a href="find-jobs.html?q=Animation">Animation</a>
+      </p>
+    </div>
+    <div class="hero-illustration">
+      <svg class="hero-svg" viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="130" cy="130" r="80" fill="#e0e7ff" opacity=".5"/>
+        <circle cx="130" cy="130" r="50" fill="#c7d2fe" opacity=".6"/>
+        <!-- Central person -->
+        <circle cx="130" cy="115" r="18" fill="#4A6CF7" opacity=".9"/>
+        <path d="M105 148c0-14 11-25 25-25s25 11 25 25" fill="#4A6CF7" opacity=".9"/>
+        <!-- Person top-left -->
+        <circle cx="68" cy="78" r="14" fill="#818cf8"/>
+        <path d="M48 102c0-11 9-20 20-20s20 9 20 20" fill="#818cf8"/>
+        <!-- Person bottom-left -->
+        <circle cx="68" cy="182" r="14" fill="#818cf8"/>
+        <path d="M48 206c0-11 9-20 20-20s20 9 20 20" fill="#818cf8"/>
+        <!-- Person top-right -->
+        <circle cx="192" cy="78" r="14" fill="#818cf8"/>
+        <path d="M172 102c0-11 9-20 20-20s20 9 20 20" fill="#818cf8"/>
+        <!-- Magnifier -->
+        <circle cx="152" cy="152" r="30" stroke="#4A6CF7" stroke-width="5" fill="none" opacity=".7"/>
+        <line x1="174" y1="174" x2="198" y2="198" stroke="#4A6CF7" stroke-width="6" stroke-linecap="round"/>
+        <!-- Connection lines -->
+        <line x1="85" y1="88" x2="112" y2="115" stroke="#a5b4fc" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="85" y1="172" x2="112" y2="145" stroke="#a5b4fc" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="175" y1="88" x2="148" y2="115" stroke="#a5b4fc" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- Latest Job Postings -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Latest Job postings</h2>
+      <a href="find-jobs.html" class="view-all">View all</a>
+    </div>
+    <div class="jobs-grid-3" id="latestJobsGrid"></div>
+  </div>
+</section>
+
+<!-- Top Companies -->
+<section class="section section-light">
+  <div class="container">
+    <div class="section-header"><h2>Top companies hiring now</h2></div>
+    <div class="companies-strip">
+      <span class="company-brand" style="color:#4285f4">Google</span>
+      <span class="company-brand" style="color:#00a4ef">Microsoft</span>
+      <span class="company-brand" style="color:#ff0000">You<span style="color:#000">Tube</span></span>
+      <span class="company-brand" style="color:#0071c5">IBM</span>
+      <span class="company-brand" style="color:#ff9900">Amazon</span>
+    </div>
+  </div>
+</section>
+
+<div id="footer"></div>
+
+<!-- Job Detail Modal -->
+<div class="modal-bg" id="jobModal">
+  <div class="modal-box" id="jobModalContent"></div>
+</div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script src="js/search.js?v=4"></script>
+<script src="js/recommendations.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('home');
+  renderFooter();
+
+  function badgeClass(type) {
+    return { 'full-time': 'badge-full', 'part-time': 'badge-part', 'internship': 'badge-intern', 'contract': 'badge-contract' }[type] || 'badge-full';
+  }
+  function badgeLabel(type) {
+    return { 'full-time': 'Full-Time', 'part-time': 'Part-Time', 'internship': 'Internship', 'contract': 'Contract' }[type] || type;
+  }
+  function fmtSalary(j) {
+    return `Salary: ${j.currency} ${(j.minSalary||0).toLocaleString()} – ${(j.maxSalary||0).toLocaleString()}`;
+  }
+  function stars(r) {
+    const full = Math.floor(r || 0);
+    return '★'.repeat(full) + '☆'.repeat(5 - full);
+  }
+  function logoHtml(logo) {
+    const initials = { google: 'G', apple: '', intel: 'intel', microsoft: 'M', amazon: 'A', meta: 'f' };
+    return `<div class="company-logo-box ${logo}">${initials[logo] || logo?.charAt(0)?.toUpperCase() || '?'}</div>`;
+  }
+
+  function renderJobCard(job, saved) {
+    const user = Auth.getCurrentUser();
+    const isSaved = saved || (user ? DB.getSaved(user.id).includes(job.id) : false);
+    return `
+      <div class="job-card" id="card-${job.id}">
+        <div class="job-card-top">
+          <div class="job-card-badges">
+            <span class="badge ${badgeClass(job.jobType)}">${badgeLabel(job.jobType)}</span>
+          </div>
+          <button class="bookmark-btn ${isSaved ? 'saved' : ''}" onclick="toggleSave('${job.id}',this)" title="Save job">
+            <svg width="18" height="18" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        </div>
+        <div class="job-card-title">${job.title}</div>
+        <div class="job-card-salary">${fmtSalary(job)}</div>
+        <div class="job-card-company">${logoHtml(job.companyLogo)}<span>${job.company}</span></div>
+        <div class="job-card-location">📍 ${job.location}</div>
+        <div class="job-card-stats"><span class="stars">${stars(job.rating)}</span> ${job.applicants || 0}+ applicants</div>
+        <div class="job-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="openJobModal('${job.id}')">View details</button>
+          <button class="btn btn-primary btn-sm" onclick="applyJob('${job.id}')">Apply now</button>
+        </div>
+      </div>`;
+  }
+
+  function toggleSave(jobId, btn) {
+    const user = Auth.getCurrentUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+    const saved = DB.toggleSaved(user.id, jobId);
+    btn.classList.toggle('saved', saved);
+    btn.innerHTML = `<svg width="18" height="18" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+  }
+
+  function applyJob(jobId) {
+    const user = Auth.getCurrentUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+    if (user.type !== 'candidate') { alert('Only candidates can apply for jobs.'); return; }
+    const ok = DB.applyToJob(jobId, user.id);
+    alert(ok ? '✓ Application submitted successfully!' : 'You have already applied for this job.');
+  }
+
+  function openJobModal(jobId) {
+    const job = DB.getJobById(jobId);
+    if (!job) return;
+    const user = Auth.getCurrentUser();
+    const hasApplied = user ? DB.hasApplied(jobId, user.id) : false;
+    document.getElementById('jobModalContent').innerHTML = `
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        ${logoHtml(job.companyLogo)}
+        <div>
+          <h3>${job.title}</h3>
+          <div style="font-size:.82rem;color:#6b7280">${job.company} · ${job.location}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        <span class="badge ${badgeClass(job.jobType)}">${badgeLabel(job.jobType)}</span>
+        <span class="badge" style="background:#f3f4f6;color:#374151">${job.workMode}</span>
+        <span class="badge" style="background:#f3f4f6;color:#374151">${job.jobLevel}</span>
+      </div>
+      <p style="font-size:.85rem;color:#6b7280;margin-bottom:12px"><strong>Salary:</strong> ${fmtSalary(job)}</p>
+      <p style="font-size:.85rem;color:#6b7280;margin-bottom:12px"><strong>Experience required:</strong> ${job.requiredExperience}+ years</p>
+      <p style="font-size:.85rem;color:#6b7280;margin-bottom:12px"><strong>Education:</strong> ${job.requiredEducation}</p>
+      <p style="font-size:.85rem;font-weight:600;margin-bottom:8px">Required Skills</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+        ${(job.requiredSkills||[]).map(s => `<span class="skill-tag">${s}</span>`).join('')}
+      </div>
+      <p style="font-size:.85rem;font-weight:600;margin-bottom:8px">Job Description</p>
+      <div style="font-size:.875rem;line-height:1.7;color:#374151;margin-bottom:20px">${job.description || ''}</div>
+      ${hasApplied
+        ? `<button class="btn btn-sm" style="background:#d1fae5;color:#065f46;cursor:default">✓ Applied</button>`
+        : `<button class="btn btn-primary" onclick="applyJob('${job.id}');closeModal()">Apply Now</button>`}
+    `;
+    document.getElementById('jobModal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('jobModal').classList.remove('open'); }
+  document.getElementById('jobModal').addEventListener('click', e => { if (e.target.id === 'jobModal') closeModal(); });
+
+  function heroSearch() {
+    const q = document.getElementById('heroSearchInput').value.trim();
+    const loc = document.getElementById('heroLocationInput').value.trim();
+    let url = 'find-jobs.html';
+    const params = [];
+    if (q) params.push('q=' + encodeURIComponent(q));
+    if (loc) params.push('loc=' + encodeURIComponent(loc));
+    if (params.length) url += '?' + params.join('&');
+    window.location.href = url;
+  }
+  document.getElementById('heroSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') heroSearch(); });
+
+  // Render latest 3 jobs
+  const jobs = DB.getJobs().slice(0, 3);
+  document.getElementById('latestJobsGrid').innerHTML = jobs.map(j => renderJobCard(j)).join('');
+</script>
+</body>
+</html>

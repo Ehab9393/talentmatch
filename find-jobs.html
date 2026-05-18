@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Jobs — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="search-page">
+  <div class="container">
+    <div class="page-header">
+      <h1>Job Search</h1>
+      <p>Search for your desired job matching your skills</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar-container">
+      <div class="search-bar-field">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Enter job title">
+      </div>
+      <div class="search-bar-field">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <input type="text" id="locationInput" placeholder="Enter location">
+      </div>
+      <div class="search-bar-field">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        <input type="number" id="expInput" placeholder="Years of experience" min="0" max="30">
+      </div>
+      <button class="btn btn-primary" onclick="doSearch()">Search</button>
+    </div>
+
+    <div class="search-layout">
+      <!-- Filters -->
+      <aside class="filter-panel">
+        <div class="filter-top">
+          <h3>Filter</h3>
+          <a href="#" onclick="clearFilters();return false">Clear all</a>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-heading" onclick="toggleSection(this)">Salary Range <span>▾</span></div>
+          <div class="filter-body">
+            <div class="salary-inputs">
+              <input type="number" id="fMinSal" placeholder="Min" min="0">
+              <span>–</span>
+              <input type="number" id="fMaxSal" placeholder="Max" min="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-heading" onclick="toggleSection(this)">Job Type <span>▾</span></div>
+          <div class="filter-body">
+            <label class="filter-opt"><input type="checkbox" value="full-time" name="jobType" onchange="doSearch()"> Full-Time</label>
+            <label class="filter-opt"><input type="checkbox" value="part-time" name="jobType" onchange="doSearch()"> Part-Time</label>
+            <label class="filter-opt"><input type="checkbox" value="internship" name="jobType" onchange="doSearch()"> Internship</label>
+            <label class="filter-opt"><input type="checkbox" value="contract" name="jobType" onchange="doSearch()"> Contract</label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-heading" onclick="toggleSection(this)">Work Mode <span>▾</span></div>
+          <div class="filter-body">
+            <label class="filter-opt"><input type="checkbox" value="on-site" name="workMode" onchange="doSearch()"> On-Site</label>
+            <label class="filter-opt"><input type="checkbox" value="remote" name="workMode" onchange="doSearch()"> Remote</label>
+            <label class="filter-opt"><input type="checkbox" value="hybrid" name="workMode" onchange="doSearch()"> Hybrid</label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-heading" onclick="toggleSection(this)">Job Functions <span>▾</span></div>
+          <div class="filter-body">
+            <label class="filter-opt"><input type="checkbox" value="Engineering" name="jobFunc" onchange="doSearch()"> Engineering</label>
+            <label class="filter-opt"><input type="checkbox" value="Cybersecurity" name="jobFunc" onchange="doSearch()"> Cybersecurity / IT</label>
+            <label class="filter-opt"><input type="checkbox" value="Data & Analytics" name="jobFunc" onchange="doSearch()"> Data &amp; Analytics</label>
+            <label class="filter-opt"><input type="checkbox" value="Design" name="jobFunc" onchange="doSearch()"> Design</label>
+            <label class="filter-opt"><input type="checkbox" value="Marketing" name="jobFunc" onchange="doSearch()"> Marketing</label>
+            <label class="filter-opt"><input type="checkbox" value="Sales" name="jobFunc" onchange="doSearch()"> Sales</label>
+            <label class="filter-opt"><input type="checkbox" value="Customer Service" name="jobFunc" onchange="doSearch()"> Customer Service</label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-heading" onclick="toggleSection(this)">Experience Level <span>▾</span></div>
+          <div class="filter-body">
+            <label class="filter-opt"><input type="checkbox" value="Fresher" name="expLevel" onchange="doSearch()"> Fresher / Entry-level</label>
+            <label class="filter-opt"><input type="checkbox" value="Mid-level" name="expLevel" onchange="doSearch()"> Mid-level</label>
+            <label class="filter-opt"><input type="checkbox" value="Senior" name="expLevel" onchange="doSearch()"> Senior</label>
+            <label class="filter-opt"><input type="checkbox" value="Lead" name="expLevel" onchange="doSearch()"> Lead / Manager</label>
+            <label class="filter-opt"><input type="checkbox" value="Director" name="expLevel" onchange="doSearch()"> Director / Executive</label>
+          </div>
+        </div>
+
+        <button class="expand-all-btn" onclick="doSearch()">↻ Apply filters</button>
+      </aside>
+
+      <!-- Results -->
+      <div class="jobs-results-area">
+        <div class="results-header">
+          <h3 id="resultsTitle">All Jobs</h3>
+          <div class="results-sort">
+            <select id="sortSelect" onchange="doSearch()">
+              <option value="popular">Popular</option>
+              <option value="recent">Most Recent</option>
+              <option value="salary-high">Salary: High → Low</option>
+              <option value="salary-low">Salary: Low → High</option>
+            </select>
+          </div>
+        </div>
+        <div class="jobs-grid-2" id="jobsGrid"></div>
+        <div id="viewMoreWrap" style="text-align:center;margin:20px 0;display:none">
+          <button class="btn btn-outline" onclick="showMore()">View more</button>
+        </div>
+
+        <!-- AI Recommendations -->
+        <div class="ai-section" id="aiSection">
+          <div class="ai-section-header">
+            <h3>AI ~ Recommended</h3>
+            <span class="ai-label" id="aiCount"></span>
+          </div>
+          <div id="memberGate"></div>
+          <div class="jobs-grid-2" id="recGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Job Detail Modal -->
+<div class="modal-bg" id="jobModal">
+  <div class="modal-box" id="jobModalContent"></div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script src="js/search.js?v=4"></script>
+<script src="js/recommendations.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('jobs');
+  renderFooter();
+
+  const BATCH = 6;
+  let allResults = [], shownCount = 0;
+
+  function badgeClass(t) { return {  'full-time':'badge-full','part-time':'badge-part','internship':'badge-intern','contract':'badge-contract'}[t]||'badge-full'; }
+  function badgeLabel(t) { return {'full-time':'Full-Time','part-time':'Part-Time','internship':'Internship','contract':'Contract'}[t]||t; }
+  function fmtSal(j) { return `${j.currency} ${(j.minSalary||0).toLocaleString()} – ${(j.maxSalary||0).toLocaleString()}`; }
+  function logoHtml(logo) {
+    const init = {google:'G',apple:'',intel:'i',microsoft:'M',amazon:'A',meta:'f'};
+    return `<div class="company-logo-box ${logo}">${init[logo]||logo?.charAt(0)?.toUpperCase()||'?'}</div>`;
+  }
+
+  function jobCard(job) {
+    const user = Auth.getCurrentUser();
+    const isSaved = user ? DB.getSaved(user.id).includes(job.id) : false;
+    const matchHtml = job.matchScore !== undefined
+      ? `<div style="font-size:.75rem;color:#065f46;background:#d1fae5;padding:2px 8px;border-radius:12px;display:inline-block;margin-bottom:6px">${job.matchScore}% match</div>`
+      : '';
+    return `
+      <div class="job-card">
+        <div class="job-card-top">
+          <div>
+            <div class="job-card-badges"><span class="badge ${badgeClass(job.jobType)}">${badgeLabel(job.jobType)}</span></div>
+            <div style="font-size:.72rem;color:#6b7280;margin-top:2px">Salary: ${fmtSal(job)}</div>
+          </div>
+          <button class="bookmark-btn ${isSaved?'saved':''}" onclick="toggleSave('${job.id}',this)">
+            <svg width="17" height="17" fill="${isSaved?'currentColor':'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        </div>
+        ${matchHtml}
+        <div class="job-card-title">${job.title}</div>
+        <div class="job-card-company">${logoHtml(job.companyLogo)}<div><span>${job.company}</span><div class="job-card-location">📍 ${job.location}</div></div></div>
+        <div class="job-card-stats"><span style="color:#f59e0b">${'★'.repeat(Math.floor(job.rating||4))}</span> ${job.applicants||0}+ applicants</div>
+        <div class="job-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="openModal('${job.id}')">View details</button>
+          <button class="btn btn-primary btn-sm" onclick="applyJob('${job.id}')">Apply now</button>
+        </div>
+      </div>`;
+  }
+
+  function getFilters() {
+    const checked = name => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(e => e.value);
+    return {
+      jobType: checked('jobType'),
+      workMode: checked('workMode'),
+      jobFunction: checked('jobFunc'),
+      experienceLevel: checked('expLevel'),
+      minSalary: document.getElementById('fMinSal').value,
+      maxSalary: document.getElementById('fMaxSal').value,
+      location: document.getElementById('locationInput').value,
+      experience: document.getElementById('expInput').value,
+      sort: document.getElementById('sortSelect').value
+    };
+  }
+
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    const filters = getFilters();
+    allResults = searchJobs(q, filters);
+    shownCount = 0;
+    renderResults(true);
+    renderRecommendations();
+  }
+
+  function renderResults(reset) {
+    const grid = document.getElementById('jobsGrid');
+    if (reset) { grid.innerHTML = ''; shownCount = 0; }
+    const slice = allResults.slice(shownCount, shownCount + BATCH);
+    grid.innerHTML += slice.map(j => jobCard(j)).join('');
+    shownCount += slice.length;
+    document.getElementById('resultsTitle').textContent = `All Jobs (${allResults.length})`;
+    const moreWrap = document.getElementById('viewMoreWrap');
+    moreWrap.style.display = shownCount < allResults.length ? 'block' : 'none';
+  }
+
+  function showMore() { renderResults(false); }
+
+  function renderRecommendations() {
+    const user = Auth.getCurrentUser();
+    const aiSection = document.getElementById('aiSection');
+    if (!user || user.type !== 'candidate') {
+      aiSection.style.display = 'none';
+      return;
+    }
+    aiSection.style.display = 'block';
+    const limit = getRecommendationLimit(user);
+    const recs = recommendJobsForCandidate(user, limit);
+    document.getElementById('aiCount').textContent = limit ? `Top ${Math.min(recs.length, limit)}` : `${recs.length} matches`;
+
+    if (!user.isMember) {
+      document.getElementById('memberGate').innerHTML = `
+        <div class="membership-gate">
+          <strong>Upgrade to unlock unlimited recommendations</strong>
+          <p>You're seeing the Top 10 recommended jobs based on your profile. Members get unlimited personalised recommendations.</p>
+          <a href="membership.html" class="btn btn-primary btn-sm">Get Membership</a>
+        </div>`;
+    } else {
+      document.getElementById('memberGate').innerHTML = '';
+    }
+
+    document.getElementById('recGrid').innerHTML = recs.map(j => jobCard(j)).join('');
+  }
+
+  function toggleSave(jobId, btn) {
+    const user = Auth.getCurrentUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+    const saved = DB.toggleSaved(user.id, jobId);
+    btn.classList.toggle('saved', saved);
+    btn.innerHTML = `<svg width="17" height="17" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+  }
+
+  function applyJob(jobId) {
+    const user = Auth.getCurrentUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+    if (user.type !== 'candidate') { alert('Only candidates can apply for jobs.'); return; }
+    const ok = DB.applyToJob(jobId, user.id);
+    alert(ok ? '✓ Application submitted successfully!' : 'You have already applied for this job.');
+  }
+
+  function openModal(jobId) {
+    const job = DB.getJobById(jobId);
+    if (!job) return;
+    const user = Auth.getCurrentUser();
+    const hasApplied = user ? DB.hasApplied(jobId, user.id) : false;
+    document.getElementById('jobModalContent').innerHTML = `
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        ${logoHtml(job.companyLogo)}
+        <div><h3 style="font-size:1.05rem">${job.title}</h3>
+          <div style="font-size:.8rem;color:#6b7280">${job.company} · ${job.location}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <span class="badge ${badgeClass(job.jobType)}">${badgeLabel(job.jobType)}</span>
+        <span class="badge" style="background:#f3f4f6;color:#374151">${job.workMode}</span>
+        <span class="badge" style="background:#f3f4f6;color:#374151">${job.jobLevel}</span>
+      </div>
+      <p style="font-size:.84rem;color:#6b7280;margin-bottom:8px"><strong>Salary:</strong> ${fmtSal(job)}</p>
+      <p style="font-size:.84rem;color:#6b7280;margin-bottom:8px"><strong>Experience:</strong> ${job.requiredExperience}+ years</p>
+      <p style="font-size:.84rem;color:#6b7280;margin-bottom:12px"><strong>Education:</strong> ${job.requiredEducation}</p>
+      <p style="font-size:.84rem;font-weight:600;margin-bottom:8px">Required Skills</p>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">
+        ${(job.requiredSkills||[]).map(s=>`<span class="skill-tag">${s}</span>`).join('')}
+      </div>
+      <p style="font-size:.84rem;font-weight:600;margin-bottom:8px">Description</p>
+      <div style="font-size:.875rem;line-height:1.7;color:#374151;margin-bottom:20px">${job.description}</div>
+      ${hasApplied
+        ? `<button class="btn btn-sm" style="background:#d1fae5;color:#065f46;cursor:default">✓ Applied</button>`
+        : `<button class="btn btn-primary" onclick="applyJob('${job.id}');closeModal()">Apply Now</button>`}`;
+    document.getElementById('jobModal').classList.add('open');
+  }
+  function closeModal() { document.getElementById('jobModal').classList.remove('open'); }
+  document.getElementById('jobModal').addEventListener('click', e => { if (e.target.id === 'jobModal') closeModal(); });
+
+  function toggleSection(heading) {
+    const body = heading.nextElementSibling;
+    const collapsed = body.style.display === 'none';
+    body.style.display = collapsed ? 'block' : 'none';
+    heading.querySelector('span').textContent = collapsed ? '▾' : '▸';
+  }
+
+  function clearFilters() {
+    document.querySelectorAll('.filter-panel input[type="checkbox"]').forEach(c => c.checked = false);
+    document.getElementById('fMinSal').value = '';
+    document.getElementById('fMaxSal').value = '';
+    document.getElementById('locationInput').value = '';
+    document.getElementById('expInput').value = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('sortSelect').value = 'popular';
+    doSearch();
+  }
+
+  // Read URL params
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('q')) document.getElementById('searchInput').value = params.get('q');
+  if (params.get('loc')) document.getElementById('locationInput').value = params.get('loc');
+
+  doSearch();
+</script>
+</body>
+</html>

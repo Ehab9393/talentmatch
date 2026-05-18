@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post a Job — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="post-job-page">
+  <div class="container">
+    <div class="page-header">
+      <h1>Post a job</h1>
+      <p>Find the best talent for your company</p>
+    </div>
+    <div class="post-job-wrap">
+      <div class="post-job-card">
+        <div id="postAlert"></div>
+
+        <div class="form-group">
+          <label>Job Title</label>
+          <input type="text" id="jTitle" placeholder="Add job title, role vacancies etc">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tags</label>
+            <input type="text" id="jTags" placeholder="Job keywords, tags etc...">
+            <p class="input-hint">Separate with commas</p>
+          </div>
+          <div class="form-group">
+            <label>Job Role</label>
+            <select id="jRole">
+              <option value="">Select...</option>
+              <option>Software Engineer</option>
+              <option>UI/UX Designer</option>
+              <option>Data Analyst</option>
+              <option>Product Manager</option>
+              <option>Marketing</option>
+              <option>Sales</option>
+              <option>Technical Support</option>
+              <option>Cloud Engineer</option>
+              <option>Mobile Developer</option>
+              <option>DevOps Engineer</option>
+              <option>HR / Recruitment</option>
+              <option>Finance / Accounting</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Salary -->
+        <div class="form-group">
+          <label>Salary</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:start">
+            <div>
+              <input type="number" id="jMinSal" placeholder="Minimum Salary..." min="0">
+            </div>
+            <div>
+              <input type="number" id="jMaxSal" placeholder="Maximum Salary..." min="0">
+            </div>
+            <select id="jCurrency" style="width:90px">
+              <option value="USD">USD</option>
+              <option value="AUD">AUD</option>
+              <option value="INR">INR</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Vacancies</label>
+            <select id="jVacancies">
+              <option value="">Select...</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Job Level</label>
+            <select id="jLevel">
+              <option value="">Select...</option>
+              <option value="Fresher">Fresher / Entry-level</option>
+              <option value="Mid-level">Mid-level</option>
+              <option value="Senior">Senior</option>
+              <option value="Lead">Lead / Manager</option>
+              <option value="Director">Director / Executive</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Job Type</label>
+            <select id="jType">
+              <option value="">Select...</option>
+              <option value="full-time">Full-Time</option>
+              <option value="part-time">Part-Time</option>
+              <option value="internship">Internship</option>
+              <option value="contract">Contract</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Work Mode</label>
+            <select id="jWorkMode">
+              <option value="">Select...</option>
+              <option value="on-site">On-Site</option>
+              <option value="remote">Remote</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Required -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Required Education</label>
+            <select id="jEdu">
+              <option value="">Select...</option>
+              <option>High School</option>
+              <option>Diploma</option>
+              <option>Associate's</option>
+              <option>Bachelor's</option>
+              <option>Master's</option>
+              <option>MBA</option>
+              <option>PhD / Doctorate</option>
+              <option>Any</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Required Experience (years)</label>
+            <select id="jExp">
+              <option value="0">No experience required</option>
+              <option value="1">1+ year</option>
+              <option value="2">2+ years</option>
+              <option value="3">3+ years</option>
+              <option value="4">4+ years</option>
+              <option value="5">5+ years</option>
+              <option value="7">7+ years</option>
+              <option value="10">10+ years</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Job Function -->
+        <div class="form-group">
+          <label>Job Function</label>
+          <select id="jFunction">
+            <option value="">Select...</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Design">Design</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Sales">Sales</option>
+            <option value="Customer Service">Customer Service</option>
+            <option value="Finance">Finance</option>
+            <option value="HR">HR</option>
+            <option value="Operations">Operations</option>
+          </select>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label>Location</label>
+          <div class="form-row">
+            <select id="jCountry">
+              <option value="">Country...</option>
+              <option value="Australia">Australia</option>
+              <option value="USA">USA</option>
+              <option value="India">India</option>
+              <option value="UK">UK</option>
+              <option value="Canada">Canada</option>
+              <option value="Singapore">Singapore</option>
+              <option value="Remote">Remote (Worldwide)</option>
+            </select>
+            <input type="text" id="jCity" placeholder="City (e.g. Sydney)">
+          </div>
+        </div>
+
+        <!-- Required Skills -->
+        <div class="form-group">
+          <label>Required Skills</label>
+          <div class="skills-wrap">
+            <div class="skills-tags" id="skillsTags"></div>
+            <input class="skill-input" id="skillInput" placeholder="Add required skill..." onkeydown="handleSkillKey(event)">
+          </div>
+          <p class="input-hint">Press Enter or comma to add</p>
+        </div>
+
+        <!-- Job Description (rich text) -->
+        <div class="form-group">
+          <label>Job Description</label>
+          <div class="rich-editor-wrap">
+            <div class="editor-toolbar">
+              <select onchange="execCmd('fontSize',this.value);this.value=''" title="Font size">
+                <option value="">14</option>
+                <option value="1">10</option>
+                <option value="2">12</option>
+                <option value="3">14</option>
+                <option value="4">16</option>
+                <option value="5">18</option>
+                <option value="6">24</option>
+              </select>
+              <div class="color-btn" title="Text color" onclick="chooseColor()"></div>
+              <div class="tb-sep"></div>
+              <button class="tb-btn" title="Bold" onclick="execCmd('bold')"><b>B</b></button>
+              <button class="tb-btn" title="Italic" onclick="execCmd('italic')"><i>I</i></button>
+              <button class="tb-btn" title="Underline" onclick="execCmd('underline')"><u>U</u></button>
+              <button class="tb-btn" title="Strikethrough" onclick="execCmd('strikeThrough')"><s>S</s></button>
+              <div class="tb-sep"></div>
+              <button class="tb-btn" title="Align left" onclick="execCmd('justifyLeft')">≡</button>
+              <button class="tb-btn" title="Align center" onclick="execCmd('justifyCenter')">☰</button>
+              <button class="tb-btn" title="Align right" onclick="execCmd('justifyRight')">≡</button>
+              <div class="tb-sep"></div>
+              <button class="tb-btn" title="Unordered list" onclick="execCmd('insertUnorderedList')">•</button>
+              <button class="tb-btn" title="Ordered list" onclick="execCmd('insertOrderedList')">1.</button>
+              <button class="tb-btn" title="Insert link" onclick="insertLink()">🔗</button>
+            </div>
+            <div class="editor-body" id="jobDesc" contenteditable="true" data-placeholder="Add your description..."></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-lg" onclick="postJob()">Post Job</button>
+      </div>
+
+      <!-- My Posted Jobs -->
+      <div id="myJobs" style="margin-top:32px"></div>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=4"></script>
+<script src="js/auth.js?v=4"></script>
+<script>
+  DB.init();
+  renderNavbar('employers');
+  renderFooter();
+
+  // Allow non-logged in users to see the form, prompt on post
+  const user = Auth.getCurrentUser();
+  let skills = [];
+
+  function execCmd(cmd, val = null) {
+    document.execCommand(cmd, false, val);
+    document.getElementById('jobDesc').focus();
+  }
+
+  function chooseColor() {
+    const color = prompt('Enter a hex color (e.g. #ff0000):');
+    if (color) execCmd('foreColor', color);
+  }
+
+  function insertLink() {
+    const url = prompt('Enter URL:');
+    if (url) execCmd('createLink', url);
+  }
+
+  function renderSkills() {
+    document.getElementById('skillsTags').innerHTML = skills.map((s, i) =>
+      `<span class="skill-tag">${s}<button onclick="removeSkill(${i})">×</button></span>`
+    ).join('');
+  }
+
+  function handleSkillKey(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = e.target.value.replace(/,/g, '').trim();
+      if (val && !skills.includes(val)) { skills.push(val); renderSkills(); }
+      e.target.value = '';
+    }
+  }
+  function removeSkill(i) { skills.splice(i, 1); renderSkills(); }
+
+  function postJob() {
+    if (!user) { window.location.href = 'login.html'; return; }
+    if (user.type !== 'employer') {
+      alert('Only employer accounts can post jobs. Please register as an employer.');
+      return;
+    }
+
+    const title = document.getElementById('jTitle').value.trim();
+    if (!title) { showAlert('Please enter a job title.'); return; }
+
+    const jobType = document.getElementById('jType').value;
+    if (!jobType) { showAlert('Please select a job type (Full-Time, Part-Time, etc.).'); return; }
+
+    const workMode = document.getElementById('jWorkMode').value;
+    if (!workMode) { showAlert('Please select a work mode (On-Site, Remote, Hybrid).'); return; }
+
+    const rawDesc = document.getElementById('jobDesc').innerHTML.trim();
+    const descText = rawDesc.replace(/<[^>]+>/g, '').trim();
+    if (!descText) { showAlert('Please add a job description.'); return; }
+
+    const country = document.getElementById('jCountry').value;
+    const city = document.getElementById('jCity').value.trim();
+    if (!country) { showAlert('Please select a country.'); return; }
+
+    const job = {
+      id: 'j' + Date.now(),
+      employerId: user.id,
+      title,
+      company: user.company || user.name,
+      companyLogo: user.companyLogo || 'default',
+      tags: document.getElementById('jTags').value.split(',').map(t => t.trim()).filter(Boolean),
+      jobRole: document.getElementById('jRole').value,
+      minSalary: parseInt(document.getElementById('jMinSal').value) || 0,
+      maxSalary: parseInt(document.getElementById('jMaxSal').value) || 0,
+      currency: document.getElementById('jCurrency').value,
+      vacancies: parseInt(document.getElementById('jVacancies').value) || 1,
+      jobLevel: document.getElementById('jLevel').value || 'Mid-level',
+      jobType: jobType,
+      workMode: workMode,
+      requiredEducation: document.getElementById('jEdu').value || "Bachelor's",
+      requiredExperience: document.getElementById('jExp').value || '0',
+      jobFunction: document.getElementById('jFunction').value || 'Engineering',
+      country, city,
+      location: [city, country].filter(Boolean).join(', ') || 'TBD',
+      requiredSkills: skills,
+      description: rawDesc,
+      applicants: 0, rating: 4.0,
+      postedAt: new Date().toISOString().split('T')[0]
+    };
+
+    DB.addJob(job);
+    showAlert('✓ Job posted successfully! It is now live on the platform.', 'ok');
+    clearForm();
+    renderMyJobs();
+  }
+
+  function showAlert(msg, type = 'err') {
+    document.getElementById('postAlert').innerHTML =
+      `<div class="alert alert-${type === 'ok' ? 'ok' : 'err'}">${msg}</div>`;
+    window.scrollTo(0, 0);
+    setTimeout(() => document.getElementById('postAlert').innerHTML = '', 4000);
+  }
+
+  function clearForm() {
+    ['jTitle','jTags','jMinSal','jMaxSal','jCity'].forEach(id => document.getElementById(id).value = '');
+    ['jRole','jLevel','jType','jWorkMode','jEdu','jFunction','jCountry'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('jExp').value = '0';
+    document.getElementById('jVacancies').value = '';
+    document.getElementById('jobDesc').innerHTML = '';
+    skills = [];
+    renderSkills();
+  }
+
+  function renderMyJobs() {
+    if (!user) return;
+    const myPosted = DB.getJobs().filter(j => j.employerId === user.id);
+    if (!myPosted.length) return;
+    document.getElementById('myJobs').innerHTML = `
+      <h3 style="margin-bottom:16px">My Posted Jobs (${myPosted.length})</h3>
+      ${myPosted.map(j => `
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:600">${j.title}</div>
+            <div style="font-size:.8rem;color:#6b7280">${j.location} · ${j.jobType} · ${j.applicants} applicants</div>
+            <div style="font-size:.75rem;color:#9ca3af;margin-top:2px">Posted: ${j.postedAt}</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <a href="candidates.html?jobId=${j.id}" class="btn btn-outline btn-sm">View Applicants</a>
+            <button class="btn btn-sm" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca" onclick="deleteJob('${j.id}')">Delete</button>
+          </div>
+        </div>`).join('')}`;
+  }
+
+  function deleteJob(id) {
+    if (!confirm('Delete this job posting?')) return;
+    DB.deleteJob(id);
+    renderMyJobs();
+  }
+
+  if (user) renderMyJobs();
+</script>
+</body>
+</html>
