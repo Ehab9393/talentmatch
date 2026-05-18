@@ -55,9 +55,9 @@ Then run these commands one by one:
 git init
 git add .
 git commit -m "Initial commit: TalentMatch web app with Flask backend and Vanilla JS frontend"
-git branch -M main
 git remote add origin https://github.com/YOUR_USERNAME/talentmatch.git
-git push -u origin main
+git push -u origin maingit branch -M main
+
 ```
 
 Replace `YOUR_USERNAME` with your actual GitHub username.
