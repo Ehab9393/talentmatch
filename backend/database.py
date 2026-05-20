@@ -179,6 +179,45 @@ def seed_db(conn=None):
                  "duration": "2022-2023", "description": "Monitored network threats."}
             ]
         },
+        {
+            "id": "u4", "type": "candidate", "name": "David Chen",
+            "email": "david@example.com", "password": generate_password_hash("password123"),
+            "mobile": "0445678901", "location": "Melbourne, Australia",
+            "preferred_location": "Melbourne", "education_level": "Bachelor's Degree",
+            "field_of_study": "Software Engineering", "years_of_experience": 4,
+            "preferred_work_mode": "remote", "bio": "Full-stack developer with experience in modern web technologies.",
+            "skills": ["JavaScript", "React", "Node.js", "Python", "PostgreSQL"],
+            "work_experience": [
+                {"title": "Full Stack Developer", "company": "WebSolutions",
+                 "duration": "2020-2024", "description": "Built full-stack web applications using React and Node.js."}
+            ]
+        },
+        {
+            "id": "u5", "type": "candidate", "name": "Emma Rodriguez",
+            "email": "emma@example.com", "password": generate_password_hash("password123"),
+            "mobile": "0456789012", "location": "Sydney, Australia",
+            "preferred_location": "Sydney", "education_level": "Bachelor's Degree",
+            "field_of_study": "Interaction Design", "years_of_experience": 3,
+            "preferred_work_mode": "hybrid", "bio": "UX/UI designer passionate about creating intuitive user experiences.",
+            "skills": ["Figma", "Adobe XD", "Prototyping", "User Research", "CSS"],
+            "work_experience": [
+                {"title": "UI/UX Designer", "company": "DesignStudio",
+                 "duration": "2021-2024", "description": "Designed user interfaces for mobile and web applications."}
+            ]
+        },
+        {
+            "id": "u6", "type": "candidate", "name": "Frank Taylor",
+            "email": "frank@example.com", "password": generate_password_hash("password123"),
+            "mobile": "0467890123", "location": "Brisbane, Australia",
+            "preferred_location": "Brisbane", "education_level": "Bachelor's Degree",
+            "field_of_study": "Information Technology", "years_of_experience": 6,
+            "preferred_work_mode": "on-site", "bio": "Experienced DevOps engineer specialising in cloud infrastructure.",
+            "skills": ["AWS", "Docker", "Kubernetes", "Terraform", "CI/CD"],
+            "work_experience": [
+                {"title": "DevOps Engineer", "company": "CloudTech",
+                 "duration": "2018-2024", "description": "Managed cloud infrastructure and CI/CD pipelines on AWS."}
+            ]
+        },
     ]
 
     # ── Employers ────────────────────────────────────────────────────
