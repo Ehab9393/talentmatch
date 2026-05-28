@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membership Plans — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="membership-page">
+  <div class="container">
+    <div class="page-header" style="margin-bottom:48px">
+      <h1>Membership plans</h1>
+      <p id="membershipSubtitle">Unlock unlimited AI-powered recommendations.</p>
+    </div>
+
+    <div id="membershipAlert"></div>
+
+    <div style="display:flex;gap:28px;justify-content:center;align-items:stretch;flex-wrap:wrap">
+
+      <!-- Free Plan -->
+      <div class="plan-card" id="freePlanCard" style="flex:1;min-width:280px;max-width:380px">
+        <div class="plan-header">
+          <div class="plan-title">Free plan</div>
+          <div class="plan-subtitle">Get started at no cost</div>
+          <div class="plan-price-big">$0<span style="font-size:1rem;font-weight:400;color:#6b7280">/month</span></div>
+        </div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features" id="freePlanFeatures">
+          <li class="feat-ok">Full access to search</li>
+          <li class="feat-ok">Keyword + filter + fuzzy search</li>
+          <li class="feat-clock">Top-10 AI recommendations only</li>
+          <li class="feat-no">Priority match ranking</li>
+        </ul>
+        <div style="margin-top:auto;padding-top:24px">
+          <button class="btn btn-outline btn-full" id="freePlanBtn" onclick="selectPlan('free')">Current plan</button>
+        </div>
+      </div>
+
+      <!-- Premium Plan -->
+      <div class="plan-card premium" id="premiumPlanCard" style="flex:1;min-width:280px;max-width:380px">
+        <div class="plan-header">
+          <div class="plan-title" style="color:var(--gold)">Premium plan</div>
+          <div class="plan-subtitle" id="premiumSubtitle">For serious job seekers &amp; top employers</div>
+          <div class="plan-price-big" style="color:var(--gold)">$19<span style="font-size:1rem;font-weight:400;color:#6b7280">/month</span></div>
+        </div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features" id="premiumPlanFeatures">
+          <li class="feat-ok">Everything in free</li>
+          <li class="feat-ok"><strong>Unlimited</strong> AI recommendations</li>
+          <li class="feat-ok">Priority match ranking</li>
+          <li class="feat-ok">Profile visibility boost</li>
+        </ul>
+        <div style="margin-top:auto;padding-top:24px">
+          <button class="btn btn-gold btn-full" id="premiumPlanBtn" onclick="selectPlan('premium')">🏆 Upgrade to Premium now</button>
+        </div>
+      </div>
+
+    </div>
+
+
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=5"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/api.js?v=5"></script>
+<script>
+  DB.init();
+  renderNavbar('membership');
+  renderFooter();
+
+  const user = Auth.getCurrentUser();
+
+  function showAlert(msg, type = 'ok') {
+    document.getElementById('membershipAlert').innerHTML =
+      `<div class="alert alert-${type}" style="max-width:760px;margin:0 auto 24px">${msg}</div>`;
+    setTimeout(() => document.getElementById('membershipAlert').innerHTML = '', 4000);
+  }
+
+  function updateUI() {
+    const u = Auth.getCurrentUser();
+    const plan = u ? u.membership : 'free';
+
+    const freeBtn = document.getElementById('freePlanBtn');
+    const premBtn = document.getElementById('premiumPlanBtn');
+
+    if (plan === 'premium') {
+      freeBtn.textContent = 'Downgrade to Free';
+      freeBtn.className = 'btn btn-outline btn-full';
+      premBtn.textContent = '✓ Current plan';
+      premBtn.className = 'btn btn-gold btn-full';
+      premBtn.disabled = true;
+      premBtn.style.opacity = '0.7';
+      document.getElementById('premiumPlanCard').style.boxShadow = '0 0 0 3px var(--gold)';
+    } else {
+      freeBtn.textContent = '✓ Current plan';
+      freeBtn.disabled = true;
+      freeBtn.style.opacity = '0.7';
+      premBtn.textContent = '🏆 Upgrade to Premium now';
+      premBtn.className = 'btn btn-gold btn-full';
+      premBtn.disabled = false;
+      premBtn.style.opacity = '1';
+    }
+  }
+
+  async function selectPlan(plan) {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const current = (Auth.getCurrentUser() || user).membership || 'free';
+    if (plan === current) return;
+
+    const msg = plan === 'premium'
+      ? 'Upgrade to Premium for $19/month?\n\nThis is a demo — no actual payment will be processed.'
+      : 'Downgrade to the Free plan?\n\nYou will lose unlimited recommendations and premium features.';
+    if (!confirm(msg)) return;
+
+    try {
+      if (await API.probe()) {
+        await API.setMembership(plan);
+      } else {
+        const updated = { ...Auth.getCurrentUser(), membership: plan };
+        DB.updateUser(updated);
+        DB.setSession(updated);
+      }
+      showAlert(plan === 'premium'
+        ? '🏆 You are now on the Premium plan! Enjoy unlimited AI recommendations.'
+        : 'Switched to Free plan.');
+    } catch (e) {
+      showAlert('Update failed: ' + e.message, 'err');
+    }
+    updateUI();
+  }
+
+  // Personalise copy based on user type
+  (function applyUserTypeCopy() {
+    const u = Auth.getCurrentUser();
+    const isEmployer = u && u.type === 'employer';
+    if (isEmployer) {
+      document.getElementById('membershipSubtitle').textContent =
+        'Unlock unlimited AI-powered candidate recommendations.';
+      document.getElementById('premiumSubtitle').textContent =
+        'For companies serious about finding top talent';
+      document.getElementById('freePlanFeatures').innerHTML = `
+        <li class="feat-ok">Browse all candidate profiles</li>
+        <li class="feat-ok">Keyword + filter candidate search</li>
+        <li class="feat-clock">Top-10 AI candidate recommendations only</li>
+        <li class="feat-no">Priority match ranking</li>`;
+      document.getElementById('premiumPlanFeatures').innerHTML = `
+        <li class="feat-ok">Everything in free</li>
+        <li class="feat-ok"><strong>Unlimited</strong> AI candidate recommendations</li>
+        <li class="feat-ok">Priority match ranking</li>
+        <li class="feat-ok">Featured employer profile</li>`;
+    }
+  })();
+
+  updateUI();
+</script>
+</body>
+</html>

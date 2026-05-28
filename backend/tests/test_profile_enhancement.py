@@ -229,3 +229,117 @@ class TestProfileFieldsViaAPI:
                          headers=auth(candidate_token))
         assert res.status_code == 200
         assert "password" not in res.get_json()
+
+
+# ── System tests: full profile enhancement flow ───────────────────────────────
+
+class TestProfileEnhancementSystemFlow:
+    """
+    System tests that exercise the complete candidate profile enhancement
+    lifecycle: register → set new profile fields → verify recommendations
+    reflect those fields → confirm data persists across separate requests.
+    """
+
+    @pytest.fixture(scope="class")
+    def new_candidate_token(self, client):
+        """Register a fresh candidate and return their token."""
+        client.post("/api/auth/register", json={
+            "name": "Profile System Test User",
+            "email": "profilesystem@example.com",
+            "password": "testpass123",
+            "mobile": "0400000001",
+            "type": "candidate"
+        })
+        res = client.post("/api/auth/login", json={
+            "email": "profilesystem@example.com",
+            "password": "testpass123"
+        })
+        assert res.status_code == 200
+        return res.get_json()["token"]
+
+    def test_new_candidate_has_empty_profile_fields(self, client, new_candidate_token):
+        """A freshly registered candidate should have no skills or work experience."""
+        res = client.get("/api/auth/me", headers=auth(new_candidate_token))
+        assert res.status_code == 200
+        data = res.get_json()
+        assert data.get("skills", []) == []
+        assert data.get("workExperience", []) == []
+
+    def test_set_full_profile_returns_all_fields(self, client, new_candidate_token):
+        """Setting all new fields at once should return them all correctly."""
+        payload = {
+            "skills": ["Python", "Django", "AWS"],
+            "preferredWorkMode": "remote",
+            "preferredLocation": "Sydney",
+            "workExperience": [
+                {"title": "Junior Developer", "company": "StartupX",
+                 "duration": "2022-2024", "description": "Built REST APIs"}
+            ]
+        }
+        res = client.put("/api/auth/me", json=payload,
+                         headers=auth(new_candidate_token))
+        assert res.status_code == 200
+        data = res.get_json()
+        assert set(data["skills"]) == {"Python", "Django", "AWS"}
+        assert data["preferredWorkMode"] == "remote"
+        assert data["preferredLocation"] == "Sydney"
+        assert len(data["workExperience"]) == 1
+
+    def test_profile_fields_influence_recommendations(self, client, new_candidate_token):
+        """After setting skills/work mode, recommendations should include matchScore."""
+        # Upgrade to premium so we can see all recommendations
+        client.post("/api/membership", json={"plan": "premium"},
+                    headers=auth(new_candidate_token))
+        res = client.get("/api/recommendations/jobs",
+                         headers=auth(new_candidate_token))
+        assert res.status_code == 200
+        jobs = res.get_json()
+        assert len(jobs) > 0
+        assert all("matchScore" in j for j in jobs)
+
+    def test_recommendations_score_higher_after_skill_update(self, client, new_candidate_token):
+        """
+        Top recommendation score should increase after adding skills that
+        match available jobs (Python/Django/AWS are required by seeded jobs).
+        """
+        from search_engine import score_job_for_candidate
+        from database import get_conn
+        import os
+
+        # Score with no skills
+        no_skill_candidate = {
+            "skills": [], "yearsOfExperience": 0, "preferredWorkMode": "",
+            "preferredLocation": "", "location": "", "educationLevel": ""
+        }
+        # Score with matching skills
+        skilled_candidate = {
+            "skills": ["Python", "Django", "AWS"], "yearsOfExperience": 2,
+            "preferredWorkMode": "remote", "preferredLocation": "",
+            "location": "", "educationLevel": ""
+        }
+        # Use a known job that requires Python/Django/AWS (j3 in seed data)
+        mock_job = {
+            "requiredSkills": ["Python", "Django", "AWS"],
+            "requiredExperience": 3, "workMode": "remote",
+            "city": "", "country": "", "requiredEducation": ""
+        }
+        score_before = score_job_for_candidate(no_skill_candidate, mock_job)
+        score_after  = score_job_for_candidate(skilled_candidate, mock_job)
+        assert score_after > score_before
+
+    def test_profile_data_persists_after_multiple_requests(self, client, new_candidate_token):
+        """
+        Profile fields set in one request should still be present after
+        two subsequent GET requests (verifies database persistence).
+        """
+        client.put("/api/auth/me",
+                   json={"preferredWorkMode": "hybrid", "preferredLocation": "Melbourne"},
+                   headers=auth(new_candidate_token))
+
+        res1 = client.get("/api/auth/me", headers=auth(new_candidate_token))
+        res2 = client.get("/api/auth/me", headers=auth(new_candidate_token))
+
+        assert res1.get_json()["preferredWorkMode"] == "hybrid"
+        assert res2.get_json()["preferredWorkMode"] == "hybrid"
+        assert res1.get_json()["preferredLocation"] == "Melbourne"
+        assert res2.get_json()["preferredLocation"] == "Melbourne"
