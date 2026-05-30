@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Details — TalentMatch</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .jd-page { max-width: 900px; margin: 40px auto; padding: 0 20px 60px; }
+    .jd-back { display:inline-flex;align-items:center;gap:6px;color:var(--primary);font-size:.875rem;font-weight:500;text-decoration:none;margin-bottom:24px; }
+    .jd-back:hover { text-decoration:underline; }
+    .jd-card { background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden; }
+    .jd-header { padding:32px 32px 24px;border-bottom:1px solid var(--border); }
+    .jd-company-row { display:flex;align-items:center;gap:16px;margin-bottom:20px; }
+    .jd-logo { width:60px;height:60px;border-radius:12px;object-fit:contain;background:#f9fafb;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:var(--primary);flex-shrink:0; }
+    .jd-title { font-size:1.5rem;font-weight:700;color:#111827;margin:0 0 4px; }
+    .jd-company-name { font-size:1rem;color:#6b7280; }
+    .jd-meta-row { display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px; }
+    .jd-meta-pill { display:inline-flex;align-items:center;gap:5px;background:#f3f4f6;border-radius:20px;padding:5px 12px;font-size:.82rem;color:#374151;font-weight:500; }
+    .jd-meta-pill svg { flex-shrink:0; }
+    .jd-salary { font-size:1.1rem;font-weight:700;color:var(--primary); }
+    .jd-actions { display:flex;gap:12px;flex-wrap:wrap; }
+    .jd-body { padding:32px; }
+    .jd-section { margin-bottom:32px; }
+    .jd-section-title { font-size:1rem;font-weight:700;color:#111827;margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid #f3f4f6; }
+    .jd-skills-wrap { display:flex;flex-wrap:wrap;gap:8px; }
+    .jd-skill { background:#eff6ff;color:#1d4ed8;border-radius:8px;padding:5px 12px;font-size:.82rem;font-weight:500; }
+    .jd-desc { font-size:.9rem;line-height:1.8;color:#374151; }
+    .jd-desc ul { margin:8px 0 8px 20px; }
+    .jd-desc li { margin-bottom:4px; }
+    .jd-info-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px; }
+    .jd-info-item { background:#f9fafb;border-radius:10px;padding:14px 16px; }
+    .jd-info-label { font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;font-weight:600;margin-bottom:4px; }
+    .jd-info-value { font-size:.9rem;font-weight:600;color:#111827; }
+    .jd-applied-badge { display:inline-flex;align-items:center;gap:6px;background:#d1fae5;color:#065f46;border-radius:8px;padding:10px 20px;font-weight:600;font-size:.9rem; }
+    .jd-sidebar { background:#f9fafb;border-left:1px solid var(--border);padding:28px; }
+    @media(min-width:700px){ .jd-layout { display:grid;grid-template-columns:1fr 260px; } }
+  </style>
+</head>
+<body>
+<div id="navbar"></div>
+
+<div class="jd-page">
+  <a class="jd-back" href="javascript:history.back()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to jobs
+  </a>
+
+  <div id="jdAlert"></div>
+  <div id="jdContent"></div>
+</div>
+
+<div id="footer"></div>
+
+<script src="js/data.js?v=5"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/recommendations.js?v=5"></script>
+<script src="js/api.js?v=5"></script>
+<script>
+  DB.init();
+  renderNavbar('find-jobs');
+  renderFooter();
+
+  const user = Auth.getCurrentUser();
+  const params = new URLSearchParams(window.location.search);
+  const jobId = params.get('id');
+
+  function showAlert(msg, type = 'ok') {
+    const el = document.getElementById('jdAlert');
+    el.innerHTML = `<div class="alert alert-${type}" style="margin-bottom:20px">${msg}</div>`;
+    setTimeout(() => el.innerHTML = '', 4000);
+  }
+
+  function logoEl(company, logoKey) {
+    const logos = { google:'G', microsoft:'M', amazon:'A', meta:'F', apple:'', netflix:'N', atlassian:'A' };
+    const colors = { google:'#4285f4', microsoft:'#00a4ef', amazon:'#ff9900', meta:'#1877f2', netflix:'#e50914', atlassian:'#0052cc' };
+    const key = (logoKey||company||'').toLowerCase();
+    const letter = logos[key] !== undefined ? logos[key] : (company||'?')[0].toUpperCase();
+    const color = colors[key] || '#6366f1';
+    return `<div class="jd-logo" style="background:${color}20;color:${color}">${letter}</div>`;
+  }
+
+  function fmtSalary(job) {
+    const min = job.minSalary || job.salaryMin;
+    const max = job.maxSalary || job.salaryMax;
+    const cur = job.currency || 'AUD';
+    if (!min && !max) return 'Not specified';
+    const fmt = n => (n >= 1000 ? (cur + ' ' + Math.round(n/1000) + 'k') : (cur + ' ' + n));
+    return min && max ? `${fmt(min)} – ${fmt(max)}` : (min ? `From ${fmt(min)}` : `Up to ${fmt(max)}`);
+  }
+
+  function badgeClass(type) {
+    const t = (type||'').toLowerCase();
+    if (t.includes('full')) return 'badge-full-time';
+    if (t.includes('part')) return 'badge-part-time';
+    if (t.includes('intern')) return 'badge-internship';
+    if (t.includes('contract')) return 'badge-contract';
+    return 'badge-full-time';
+  }
+
+  function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const d = Math.floor(diff / 86400000);
+    if (d === 0) return 'Today';
+    if (d === 1) return 'Yesterday';
+    if (d < 7) return `${d} days ago`;
+    if (d < 30) return `${Math.floor(d/7)} weeks ago`;
+    return `${Math.floor(d/30)} months ago`;
+  }
+
+  async function applyJob(jobId) {
+    if (!user) { window.location.href = 'login.html'; return; }
+    if (user.type !== 'candidate') { showAlert('Only candidates can apply for jobs.', 'err'); return; }
+
+    let applied = false;
+    try {
+      if (await API.probe()) {
+        await API.applyToJob(jobId);
+        applied = true;
+      } else {
+        applied = DB.applyToJob(jobId, user.id);
+      }
+    } catch(e) {
+      applied = DB.applyToJob(jobId, user.id);
+    }
+
+    if (applied) {
+      showAlert('✓ Application submitted successfully!', 'ok');
+      renderPage(); // refresh to show "Applied" state
+    } else {
+      showAlert('You have already applied to this job.', 'err');
+    }
+  }
+
+  function toggleSave(jobId, btn) {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const saved = DB.toggleSaved(user.id, jobId);
+    btn.innerHTML = saved
+      ? `<svg width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Saved`
+      : `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Save job`;
+    btn.style.color = saved ? 'var(--primary)' : '';
+  }
+
+  function renderPage() {
+    const job = DB.getJobById ? DB.getJobById(jobId) : (DB.getJobs()||[]).find(j => j.id === jobId);
+
+    if (!job) {
+      document.getElementById('jdContent').innerHTML =
+        `<div style="text-align:center;padding:80px 20px;color:#6b7280">
+          <p style="font-size:1.2rem;margin-bottom:16px">Job not found.</p>
+          <a href="find-jobs.html" class="btn btn-primary">Browse all jobs</a>
+        </div>`;
+      return;
+    }
+
+    document.title = `${job.title} at ${job.company} — TalentMatch`;
+
+    const applicants = typeof job.applicants === 'number' ? job.applicants : (job.applicants||[]).length;
+    const hasApplied = user && Array.isArray(job.applicants) && job.applicants.includes(user.id);
+    const isSaved = user && (DB.getSaved ? DB.getSaved(user.id) : []).includes(job.id);
+    const skills = job.requiredSkills || job.skills || [];
+    const matchScore = user && user.type === 'candidate'
+      ? (typeof scoreJobForCandidate === 'function' ? scoreJobForCandidate(user, job) : null)
+      : null;
+
+    document.getElementById('jdContent').innerHTML = `
+      <div class="jd-card">
+        <div class="jd-header">
+          <div class="jd-company-row">
+            ${logoEl(job.company, job.companyLogo)}
+            <div>
+              <h1 class="jd-title">${job.title}</h1>
+              <div class="jd-company-name">${job.company}${job.location ? ' · ' + job.location : ''}</div>
+            </div>
+          </div>
+
+          <div class="jd-meta-row">
+            <span class="badge ${badgeClass(job.jobType||job.type)}" style="font-size:.8rem">${(job.jobType||job.type||'').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</span>
+            ${job.workMode ? `<span class="jd-meta-pill">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              ${job.workMode.charAt(0).toUpperCase()+job.workMode.slice(1)}</span>` : ''}
+            ${job.location ? `<span class="jd-meta-pill">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              ${job.location}</span>` : ''}
+            ${job.postedAt ? `<span class="jd-meta-pill">Posted ${timeAgo(job.postedAt)}</span>` : ''}
+            ${applicants > 0 ? `<span class="jd-meta-pill">${applicants}+ applicants</span>` : ''}
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div class="jd-salary">${fmtSalary(job)}</div>
+            ${matchScore !== null ? `
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:.8rem;color:#6b7280">AI match</span>
+                <div class="ai-match-bar" style="width:120px"><div class="ai-match-fill" style="width:${matchScore}%"></div></div>
+                <span class="ai-match-pct">${matchScore}%</span>
+              </div>` : ''}
+          </div>
+
+          <div class="jd-actions" style="margin-top:20px">
+            ${hasApplied
+              ? `<span class="jd-applied-badge">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                  Application submitted
+                </span>`
+              : `<button class="btn btn-primary" onclick="applyJob('${job.id}')">Apply now</button>`}
+            <button class="btn btn-outline" id="saveBtn" onclick="toggleSave('${job.id}', this)" style="${isSaved?'color:var(--primary)':''}" >
+              <svg width="15" height="15" fill="${isSaved?'currentColor':'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              ${isSaved ? 'Saved' : 'Save job'}
+            </button>
+          </div>
+        </div>
+
+        <div class="jd-layout">
+          <div class="jd-body">
+
+            ${job.description ? `
+            <div class="jd-section">
+              <h2 class="jd-section-title">Job Description</h2>
+              <div class="jd-desc">${job.description}</div>
+            </div>` : ''}
+
+            ${skills.length ? `
+            <div class="jd-section">
+              <h2 class="jd-section-title">Required Skills</h2>
+              <div class="jd-skills-wrap">
+                ${skills.map(s => `<span class="jd-skill">${s}</span>`).join('')}
+              </div>
+            </div>` : ''}
+
+          </div>
+
+          <div class="jd-sidebar">
+            <h2 class="jd-section-title" style="font-size:.875rem">Job Overview</h2>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              ${job.jobLevel ? `<div><div class="jd-info-label">Experience Level</div><div class="jd-info-value">${job.jobLevel}</div></div>` : ''}
+              ${job.requiredExperience ? `<div><div class="jd-info-label">Experience Required</div><div class="jd-info-value">${job.requiredExperience}+ years</div></div>` : ''}
+              ${job.requiredEducation ? `<div><div class="jd-info-label">Education</div><div class="jd-info-value">${job.requiredEducation}</div></div>` : ''}
+              ${job.jobFunction ? `<div><div class="jd-info-label">Job Function</div><div class="jd-info-value">${job.jobFunction}</div></div>` : ''}
+              ${job.workMode ? `<div><div class="jd-info-label">Work Mode</div><div class="jd-info-value" style="text-transform:capitalize">${job.workMode}</div></div>` : ''}
+              ${job.vacancies ? `<div><div class="jd-info-label">Vacancies</div><div class="jd-info-value">${job.vacancies}</div></div>` : ''}
+            </div>
+
+            ${job.tags && job.tags.length ? `
+            <div style="margin-top:24px">
+              <div class="jd-info-label" style="margin-bottom:8px">Tags</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                ${job.tags.map(t=>`<span style="background:#e5e7eb;color:#374151;border-radius:6px;padding:3px 8px;font-size:.75rem">${t}</span>`).join('')}
+              </div>
+            </div>` : ''}
+          </div>
+        </div>
+
+      </div>
+    `;
+  }
+
+  if (!jobId) {
+    window.location.href = 'find-jobs.html';
+  } else {
+    renderPage();
+  }
+</script>
+</body>
+</html>
